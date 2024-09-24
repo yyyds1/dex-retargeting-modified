@@ -85,3 +85,11 @@ Visualize the retargeting results for multiple robot hands along with the human 
 python visualize_hand_object.py --dexycb-dir=PATH_TO_YOUR_DEXYCB_DIR_ROOT --robots allegro shadow svh
 # Close the viewer window to quit
 ```
+
+### Export the retargeting results
+
+Export the retargeting results as an csv file including the hand's joints position and hand's root position. The files were in the traj dict.
+
+```shell
+python get_joint_traj.py --dexycb-dir=PATH_TO_YOUR_DEXYCB_DIR_ROOT --robots allegro shadow svh
+```

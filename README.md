@@ -66,6 +66,8 @@ e.g. [DexMV](https://yzqin.github.io/dexmv/).
 
 [Tutorial on retargeting from hand-object pose dataset](example/position_retargeting/README.md)
 
+__The retargeting results of this method could be exported as csv files.__
+
 ## FAQ and Troubleshooting
 
 ### Joint Orders for Retargeting
