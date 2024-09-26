@@ -16,3 +16,5 @@ imgui.ini
 /log
 /temp/
 *.egg-info
+/dex-urdf/
+/assets/
