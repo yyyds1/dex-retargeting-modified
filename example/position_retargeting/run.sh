@@ -1,0 +1,1 @@
+python get_joint_traj.py --dexycb-dir=/home/hz/Downloads/dataset --robots allegro shadow svh

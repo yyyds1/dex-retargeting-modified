@@ -56,9 +56,12 @@ def get_joint_traj(robots: Optional[List[RobotName]], data_root: Path, data_indi
     data = dataset[data_id]
     hand_pose = data["hand_pose"]
     hand_shape = data["hand_shape"]
+    object_pose = data["object_pose"]
     extrinsic_mat = data["extrinsics"]
+    num_ycb_objects = len(data["ycb_ids"])
     mano_layer = MANOLayer("right", hand_shape.astype(np.float32))
     num_frame = hand_pose.shape[0]
+    json_data = {}
     
     # Skip frames where human hand is not detected in DexYCB dataset
     start_frame = 0
@@ -90,7 +93,8 @@ def get_joint_traj(robots: Optional[List[RobotName]], data_root: Path, data_indi
         
         # Retargeting
         traj = []
-        traj.append(retargeting.optimizer.target_joint_names)
+        # traj.append(retargeting.optimizer.target_joint_names)
+        json_data["joint_names"] = retargeting.optimizer.target_joint_names
         for i in range(start_frame, num_frame):
             hand_pose_frame = hand_pose[i]
             vertex, joint = compute_hand_geometry(hand_pose_frame, extrinsic_mat, mano_layer)
@@ -98,15 +102,50 @@ def get_joint_traj(robots: Optional[List[RobotName]], data_root: Path, data_indi
             ref_value = joint[indices, :]
             retargeting.retarget(ref_value)
             qpos = retargeting.last_qpos
-            traj.append(qpos)
+            traj.append(qpos.tolist())
+        
+        json_data["traj"] = traj
+    
+    json_data["obj_pose_p"] = []
+    json_data["obj_pose_q"] = []
+    pose_vec = pt.pq_from_transform(extrinsic_mat)
+    camera_pose = sapien.Pose(pose_vec[0:3], pose_vec[3:7]).inv()
+    # json_data["obj_list"] = data["ycb_ids"]
+    for i in range(start_frame, num_frame):
+        obj_traj_p = []
+        obj_traj_q = []
+        for obj_id in range(num_ycb_objects):
+            object_pose_frame = object_pose[i]
+            pos_quat = object_pose_frame[obj_id]
+
+            # Quaternion convention: xyzw -> wxyz
+            pose = camera_pose * sapien.Pose(pos_quat[4:], np.concatenate([pos_quat[3:4], pos_quat[:3]]))
+            
+            # convert pose to array that can be json serialized
+            pose_p = np.concatenate([pose.p]).tolist()
+            pose_q = np.concatenate([pose.q]).tolist()
+            
+            obj_traj_p.append(pose_p)
+            obj_traj_q.append(pose_q)
+        json_data["obj_pose_p"].append(obj_traj_p)
+        json_data["obj_pose_q"].append(obj_traj_q)
+    
+    # save json_data as json file that is easy to read
+    file_name = robot_name.name + "_" + data["capture_name"] + ".json"
+    with open(ROBOT_JOINT_TRAJ_DIR + file_name, 'w') as file:
+        import json
+        json.dump(json_data, file, indent=2)
             
         # Save the traj as csv file
-        file_name = robot_name.name + "_" + data["capture_name"] + ".csv"
-        with open(ROBOT_JOINT_TRAJ_DIR + file_name, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(traj)
-        
-        
+        # file_name = robot_name.name + "_" + data["capture_name"] + ".csv"
+        # with open(ROBOT_JOINT_TRAJ_DIR + file_name, 'w', newline='') as file:
+        #     writer = csv.writer(file)
+        #     writer.writerows(traj)
+
+        # save the traj as npy file
+        # file_name = robot_name.name + "_" + data["capture_name"] + ".npy"
+        # np.save(ROBOT_JOINT_TRAJ_DIR + file_name, np.array(traj))
+        # print(f"Saved {file_name}")
         
 def main(dexycb_dir: str, robots: Optional[List[RobotName]] = None, data_indices: List[int] = None, fps: int = 10):
     """

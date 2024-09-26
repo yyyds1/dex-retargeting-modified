@@ -27,7 +27,7 @@ def viz_hand_object(robots: Optional[Tuple[RobotName]], data_root: Path, fps: in
     else:
         viewer = RobotHandDatasetSAPIENViewer(list(robots), HandType.right, headless=False)
 
-    # Data ID, feel free to change it to visualize different trajectory
+    # Data ID, feel free to change it to visualize different trajectory ----- max of 501 -- by hz
     data_id = 4
 
     sampled_data = dataset[data_id]
