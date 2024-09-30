@@ -15,4 +15,5 @@ imgui.ini
 /.idea
 /log
 /temp/
+example/position_retargeting/SmallDataset
 *.egg-info

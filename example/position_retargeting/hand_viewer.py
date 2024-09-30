@@ -203,8 +203,8 @@ class HandDatasetSAPIENViewer:
             if vertex is not None:
                 self._update_hand(vertex)
             for k in range(len(self.objects)):
-                pos_quat = object_pose_frame[k]
-                pose = self.camera_pose * sapien.Pose(pos_quat[4:], np.concatenate([pos_quat[3:4], pos_quat[:3]]))
+                pos_quat = object_pose_frame[k]  # xyzw
+                pose = self.camera_pose * sapien.Pose(pos_quat[4:], np.concatenate([pos_quat[3:4], pos_quat[:3]]))  #wxyz
                 self.objects[k].set_pose(pose)
             self.scene.update_render()
             if self.headless:
