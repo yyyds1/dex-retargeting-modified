@@ -25,17 +25,19 @@ def viz_hand_object(robots: Optional[Tuple[RobotName]], data_root: Path, fps: in
     if robots is None:
         viewer = HandDatasetSAPIENViewer(headless=False)
     else:
-        viewer = RobotHandDatasetSAPIENViewer(list(robots), HandType.right, headless=False)
+        viewer = RobotHandDatasetSAPIENViewer(list(robots), HandType.right, headless=True)
 
     # Data ID, feel free to change it to visualize different trajectory
     data_id = 0
 
-    sampled_data = dataset[data_id]
-    for key, value in sampled_data.items():
-        if "pose" not in key:
-            print(f"{key}: {value}")
-    viewer.load_object_hand(sampled_data)
-    viewer.render_dexycb_data(sampled_data, fps)
+    for data_id in range(10):
+
+        sampled_data = dataset[data_id]
+        for key, value in sampled_data.items():
+            if "pose" not in key:
+                print(f"{key}: {value}")
+        viewer.load_object_hand(sampled_data, id=data_id)
+        viewer.render_dexycb_data(sampled_data, fps)
 
 
 def main(dexycb_dir: str, robots: Optional[List[RobotName]] = None, fps: int = 10):
